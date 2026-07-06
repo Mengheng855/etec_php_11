@@ -68,7 +68,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form action="insert.php" method="post" enctype="multipart/form-data">
+                            <form id="form" action="insert.php" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="id" id="id">
                                 <div class="mb-2">
                                     <label for="" class="form-label">Name</label>
                                     <input type="text" name="name" id="name" class="form-control" placeholder="Name...">
@@ -99,7 +100,7 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                     <button type="submit" id="save" name="btnSave" class="btn btn-primary">Save</button>
-                                    <button type="submit" id="update" name="btnSave" class="btn btn-warning">Update</button>
+                                    <button type="submit" id="update" name="btnUpdate" class="btn btn-warning">Update</button>
                                 </div>
                             </form>
                         </div>
@@ -128,11 +129,15 @@
             $('#exampleModalLabel').text('Add Employee')
             $('#save').show()
             $('#update').hide()
+            $('#form').attr('action','insert.php')
+            $('#form').trigger('reset')
+            $('#image').attr('src','https://i.pinimg.com/736x/f5/47/d8/f547d800625af9056d62efe8969aeea0.jpg')
         })
         $(document).on('click','#edit',function(){
             $('#exampleModalLabel').text('Update Employee')
             $('#save').hide()
             $('#update').show()
+            $('#form').attr('action','update.php')
             const row=$(this).closest('tr')
             const id=row.find('td:eq(0)').text().trim()
             const name=row.find('td:eq(1)').text().trim()
@@ -141,6 +146,7 @@
             const profile=row.find('td:eq(4) img').attr('src')
             console.log(salary);
             
+            $('#id').val(id)
             $('#name').val(name)
             $('#position').val(position)
             $('#salary').val(salary)
