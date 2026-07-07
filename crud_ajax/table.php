@@ -35,20 +35,30 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>001</td>
-                    <td>C++</td>
-                    <td>Bjarne Stroustrup</td>
-                    <td>5</td>
-                    <td>$5</td>
-                    <td>
-                        <img src="https://i.pinimg.com/736x/4e/55/63/4e5563f53216ec1a8e149f88473e9455.jpg" width="30px" height="30px" alt="">
-                    </td>
-                    <td>
-                        <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
-                        <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
-                    </td>
-                </tr>
+                <?php
+                    require 'conn.php';
+                    global $conn;
+                    $select="SELECT * FROM tbl_books";
+                    $ex=$conn->query($select);
+                    while($row=mysqli_fetch_assoc($ex)){
+                        echo '
+                            <tr>
+                                <td>'.$row['id'].'</td>
+                                <td>'.$row['title'].'</td>
+                                <td>'.$row['author'].'</td>
+                                <td>'.$row['qty'].'</td>
+                                <td>'.$row['price'].'</td>
+                                <td>
+                                    <img src="'.$row['image'].'" width="30px" height="30px" alt="">
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                    <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
+                                </td>
+                            </tr>
+                        ';
+                    }
+                ?>
             </tbody>
             
 
@@ -107,7 +117,7 @@
             const qty=$('#qty').val()
             const price=$('#price').val()
             const file=$('#file')[0].files[0]
-           
+            const imageUrl=URL.createObjectURL(file)
             let formData=new FormData()
             formData.append('title',title);
             formData.append('author',author);
@@ -121,8 +131,24 @@
                 data:formData,
                 contentType:false,
                 processData:false,
-                success:function(){
-                    alert(123)
+                success:function(res){
+                    
+                    $('tbody').append(`
+                         <tr>
+                            <td>${res}</td>
+                            <td>${title}</td>
+                            <td>${author}</td>
+                            <td>${qty}</td>
+                            <td>${price}</td>
+                            <td>
+                                <img src="${imageUrl}" width="30px" height="30px" alt="">
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
+                            </td>
+                        </tr>
+                    `)
                     $('#form').trigger('reset')
                 }
             })
