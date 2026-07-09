@@ -52,7 +52,7 @@
                                     <img src="'.$row['image'].'" width="30px" height="30px" alt="">
                                 </td>
                                 <td>
-                                    <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                    <button id="delete" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                                     <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
                                 </td>
                             </tr>
@@ -131,8 +131,7 @@
                 data:formData,
                 contentType:false,
                 processData:false,
-                success:function(res){
-                    
+                success:function(res){  
                     $('tbody').append(`
                          <tr>
                             <td>${res}</td>
@@ -144,12 +143,32 @@
                                 <img src="${imageUrl}" width="30px" height="30px" alt="">
                             </td>
                             <td>
-                                <button class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                <button id="delete" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
                                 <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
                             </td>
                         </tr>
                     `)
                     $('#form').trigger('reset')
+                }
+            })
+            
+        })
+        $(document).on('click','#delete',function(){
+            if(!confirm("ARE YOU SURE?")) return;
+            const row=$(this).closest('tr')
+            const id=row.find('td:eq(0)').text().trim()
+           
+            $.ajax({
+                url:'delete.php',
+                method:'GET',
+                data:{
+                    id:id
+                },
+                success:function(res){  
+                    if(res=='success'){
+                        
+                        row.remove()
+                    }
                 }
             })
             
