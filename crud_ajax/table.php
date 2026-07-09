@@ -19,7 +19,7 @@
 <body>
     <div class="container mt-4 p-5 shadow rounded-3">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-outline-primary mb-2 float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <button type="button" id="add" class="btn btn-outline-primary mb-2 float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
             +Add Book
         </button>
         <table class="table table-hover text-center">
@@ -36,31 +36,31 @@
             </thead>
             <tbody>
                 <?php
-                    require 'conn.php';
-                    global $conn;
-                    $select="SELECT * FROM tbl_books";
-                    $ex=$conn->query($select);
-                    while($row=mysqli_fetch_assoc($ex)){
-                        echo '
+                require 'conn.php';
+                global $conn;
+                $select = "SELECT * FROM tbl_books";
+                $ex = $conn->query($select);
+                while ($row = mysqli_fetch_assoc($ex)) {
+                    echo '
                             <tr>
-                                <td>'.$row['id'].'</td>
-                                <td>'.$row['title'].'</td>
-                                <td>'.$row['author'].'</td>
-                                <td>'.$row['qty'].'</td>
-                                <td>'.$row['price'].'</td>
+                                <td>' . $row['id'] . '</td>
+                                <td>' . $row['title'] . '</td>
+                                <td>' . $row['author'] . '</td>
+                                <td>' . $row['qty'] . '</td>
+                                <td>' . $row['price'] . '</td>
                                 <td>
-                                    <img src="'.$row['image'].'" width="30px" height="30px" alt="">
+                                    <img src="' . $row['image'] . '" width="30px" height="30px" alt="">
                                 </td>
                                 <td>
                                     <button id="delete" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
-                                    <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
+                                    <button id="edit" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
                                 </td>
                             </tr>
                         ';
-                    }
+                }
                 ?>
             </tbody>
-            
+
 
             <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -72,7 +72,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="form" action=""  method="post" enctype="multipart/form-data">
+                            <form id="form" action="" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="id" id="id">
                                 <div class="mb-2">
                                     <label for="" class="form-label">Title</label>
                                     <input type="text" class="form-control" id="title" name="title" placeholder="Title...">
@@ -95,11 +96,12 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button"  id="save"  data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                                    <button type="button" id="save" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                                    <button type="button" id="update" data-bs-dismiss="modal" class="btn btn-warning">Update</button>
                                 </div>
                             </form>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
@@ -109,29 +111,29 @@
 
 </html>
 <script>
-    $(document).ready(function(){
-       
-        $('#save').click(function(){
-            const title=$('#title').val()
-            const author=$('#author').val()
-            const qty=$('#qty').val()
-            const price=$('#price').val()
-            const file=$('#file')[0].files[0]
-            const imageUrl=URL.createObjectURL(file)
-            let formData=new FormData()
-            formData.append('title',title);
-            formData.append('author',author);
-            formData.append('qty',qty);
-            formData.append('price',price);
-            formData.append('file',file);
+    $(document).ready(function() {
+
+        $('#save').click(function() {
+            const title = $('#title').val()
+            const author = $('#author').val()
+            const qty = $('#qty').val()
+            const price = $('#price').val()
+            const file = $('#file')[0].files[0]
+            const imageUrl = URL.createObjectURL(file)
+            let formData = new FormData()
+            formData.append('title', title);
+            formData.append('author', author);
+            formData.append('qty', qty);
+            formData.append('price', price);
+            formData.append('file', file);
 
             $.ajax({
-                url:'insert.php',
-                method:'POST',
-                data:formData,
-                contentType:false,
-                processData:false,
-                success:function(res){  
+                url: 'insert.php',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(res) {
                     $('tbody').append(`
                          <tr>
                             <td>${res}</td>
@@ -144,34 +146,108 @@
                             </td>
                             <td>
                                 <button id="delete" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
-                                <button class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
+                                <button id="edit" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
                             </td>
                         </tr>
                     `)
                     $('#form').trigger('reset')
                 }
             })
-            
+
         })
-        $(document).on('click','#delete',function(){
-            if(!confirm("ARE YOU SURE?")) return;
-            const row=$(this).closest('tr')
-            const id=row.find('td:eq(0)').text().trim()
-           
+        $(document).on('click', '#delete', function() {
+            if (!confirm("ARE YOU SURE?")) return;
+            const row = $(this).closest('tr')
+            const id = row.find('td:eq(0)').text().trim()
+
             $.ajax({
-                url:'delete.php',
-                method:'GET',
-                data:{
-                    id:id
+                url: 'delete.php',
+                method: 'GET',
+                data: {
+                    id: id
                 },
-                success:function(res){  
-                    if(res=='success'){
-                        
+                success: function(res) {
+                    if (res == 'success') {
+
                         row.remove()
                     }
                 }
             })
-            
+
+        })
+        $('#add').click(function() {
+            $('#save').show()
+            $('#update').hide()
+            $('#exampleModalLabel').text('Add Book')
+        })
+        $(document).on('click', '#edit', function() {
+            $('#exampleModalLabel').text('Update Book')
+            $('#save').hide()
+            $('#update').show()
+
+            const row = $(this).closest('tr')
+            const id = row.find('td:eq(0)').text().trim()
+            const title = row.find('td:eq(1)').text().trim()
+            const author = row.find('td:eq(2)').text().trim()
+            const qty = row.find('td:eq(3)').text().trim()
+            const price = row.find('td:eq(4)').text().trim()
+
+            $('#id').val(id)
+            $('#title').val(title)
+            $('#author').val(author)
+            $('#qty').val(qty)
+            $('#price').val(price)
+
+            $('#update').click(function() {
+                const id = $('#id').val()
+                const title = $('#title').val()
+                const author = $('#author').val()
+                const qty = $('#qty').val()
+                const price = $('#price').val()
+                const file = $('#file')[0].files[0]
+                if(file){
+                    const imageUrl = URL.createObjectURL(file)
+                }
+                let formData = new FormData()
+                formData.append('id', id);
+                formData.append('title', title);
+                formData.append('author', author);
+                formData.append('qty', qty);
+                formData.append('price', price);
+                formData.append('file', file);
+
+                $.ajax({
+                    url: 'update.php',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(res) {
+                        alert(123)
+                        if (res == 'success') {
+                            $('tbody').each(`
+                             <tr>
+                                <td>${id}</td>
+                                <td>${title}</td>
+                                <td>${author}</td>
+                                <td>${qty}</td>
+                                <td>${price}</td>
+                                <td>
+                                    <img src="123" width="30px" height="30px" alt="">
+                                </td>
+                                <td>
+                                    <button id="delete" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                    <button id="edit" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-warning"><i class="fa-solid fa-pencil"></i></button>
+                                </td>
+                            </tr>
+
+                            
+                        `)
+                        }
+                        $('#form').trigger('reset')
+                    }
+                })
+            })
         })
     })
 </script>
